@@ -10,5 +10,6 @@ if (-not $ItemName -or -not $ApiKey) {
     exit
 }
 
-go build
+# Wait for build to finish before executing
+go build | Out-Null
 Start-Process -WindowStyle hidden -FilePath The-Lebron-James-Notifier.exe -ArgumentList $ItemName, $ApiKey
