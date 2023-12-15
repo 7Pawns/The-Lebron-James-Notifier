@@ -77,6 +77,16 @@ func makeRequest(notifier Notifier) []byte {
 	resp, err := http.DefaultClient.Do(req)
 	checkError(err)
 
+	if statusCode := resp.StatusCode; statusCode != 200 {
+		toast := toast.Notification{
+			AppID:   "Lebron James Notifier",
+			Message: fmt.Sprintf("Received status code %d", statusCode),
+		}
+
+		toast.Push()
+		return nil
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	checkError(err)
 
@@ -86,10 +96,12 @@ func makeRequest(notifier Notifier) []byte {
 }
 
 func (notifier Notifier) isSkinInJson() bool {
-	// You can use `ObjectEach` helper to iterate objects { "key1":object1, "key2":object2, .... "keyN":objectN }
 	resp := makeRequest(notifier)
-	var skinFound bool
+	if resp == nil {
+		return false
+	}
 
+	var skinFound bool
 	jsonparser.ArrayEach(resp, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 		if curr, _, _, _ := jsonparser.Get(value, "name"); string(curr) == notifier.skin {
 			skinFound = true
