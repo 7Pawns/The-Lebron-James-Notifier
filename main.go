@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	helpMessage string = "Please use the following syntax: go run main.go <skin> <apiKey>"
+	helpMessage string = "Please use the following syntax: .\\The-Lebron-James-Notifier.exe <skin> <apiKey>"
 )
 
 func main() {
