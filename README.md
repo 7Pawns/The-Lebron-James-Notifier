@@ -4,8 +4,7 @@ Find out when Lebron James (and other non important items) is in the item shop b
 ## Command Syntax
 The following command does not generate a window when running the app
 ```console
-$ go build -ldflags -H=windowsgui
-$ .\The-Lebron-James-Notifier.exe <item> <apiKey>
+$ ./run -ItemName <item> -ApiKey <ApiKey>
 ```
 
 ## How to get api key
