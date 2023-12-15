@@ -11,12 +11,10 @@ import (
 )
 
 const (
-	noSkinProvided         = ""
-	lebronJames            = "Lebron James"
-	lebronJamesLoveMessage = "LETS GO!!!!! WAITING FOR LEBRON JAMES!!!\\n"
-	otherSkinHateMessage   = "YOUR HATE FOR LEBRON JAMES SHALL BE PUNISHED, but ok looking for %s...\n"
-	itemShopUrl            = "https://fnbr.co/api/shop"
-	apiKeyHeader           = "x-api-key"
+	noSkinProvided = ""
+	lebronJames    = "Lebron James"
+	itemShopUrl    = "https://fnbr.co/api/shop"
+	apiKeyHeader   = "x-api-key"
 )
 
 type Notifier struct {
@@ -34,12 +32,10 @@ func NewNotifier(skin string, apiKey string) *Notifier {
 	notifier := new(Notifier)
 	notifier.apiKey = apiKey
 
-	if skin == noSkinProvided || skin == lebronJames {
+	if skin == noSkinProvided {
 		notifier.skin = lebronJames
-		fmt.Println(lebronJamesLoveMessage)
 	} else {
 		notifier.skin = skin
-		fmt.Printf(otherSkinHateMessage, skin)
 	}
 
 	return notifier
