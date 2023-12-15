@@ -1,10 +1,13 @@
 package notifier
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/buger/jsonparser"
+	"github.com/go-toast/toast"
+	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 const (
@@ -43,6 +46,33 @@ func NewNotifier(skin string, apiKey string) *Notifier {
 }
 
 func (notifier Notifier) Run() {
+	ticker := time.NewTicker(24 * time.Hour)
+	shouldStop := make(chan bool)
+
+	defer func() {
+		firstTime := true
+		for {
+			if firstTime {
+				firstTime = false
+				notifier.checkItemShop()
+			}
+			select {
+			case <-shouldStop:
+				return
+			case <-ticker.C:
+				notifier.checkItemShop()
+			}
+		}
+	}()
+}
+
+func (notifier Notifier) checkItemShop() {
+	if notifier.isSkinInJson() {
+		notifier.pushNotification()
+	}
+}
+
+func makeRequest(notifier Notifier) []byte {
 	req, err := http.NewRequest(http.MethodGet, itemShopUrl, nil)
 	checkError(err)
 
@@ -51,12 +81,34 @@ func (notifier Notifier) Run() {
 	resp, err := http.DefaultClient.Do(req)
 	checkError(err)
 
-	var j interface{}
-	err = json.NewDecoder(resp.Body).Decode(&j)
+	body, err := io.ReadAll(resp.Body)
 	checkError(err)
 
 	err = resp.Body.Close()
-	checkError(err)
 
-	fmt.Printf("%s", j)
+	return body
+}
+
+func (notifier Notifier) isSkinInJson() bool {
+	// You can use `ObjectEach` helper to iterate objects { "key1":object1, "key2":object2, .... "keyN":objectN }
+	resp := makeRequest(notifier)
+	var skinFound bool
+
+	jsonparser.ArrayEach(resp, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
+		if curr, _, _, _ := jsonparser.Get(value, "name"); string(curr) == notifier.skin {
+			skinFound = true
+		}
+	}, "data", "featured")
+
+	return skinFound
+}
+
+func (notifier Notifier) pushNotification() {
+	toast := toast.Notification{
+		AppID:   "Lebron James Notifier",
+		Message: fmt.Sprintf("%s is in the item shop!", notifier.skin),
+	}
+
+	err := toast.Push()
+	checkError(err)
 }
